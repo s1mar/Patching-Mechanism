@@ -1,0 +1,19 @@
+{	
+    "region":"India",
+    "build": "300",
+    "newfiles":[
+      {"name":"res.java","path":"/work/rest/"},
+      {"name":"abc.py","path":"/work/api/"}
+      
+    ],
+    "modfiles":[
+   {"name":"abc.txt","path":"/work/"},
+   {"name":"def.py","path":"/work/apiv2/"},
+   {"name":"DemoTargetApp.class","path":"/build/classes/java/main/demo/"}
+    ],
+    "delfiles":[
+       {"name":"lib.txt","path":"/work/libs/"},
+       {"name":"abc.fer","path":"/work/ext/"}
+    ]	
+  
+  }
