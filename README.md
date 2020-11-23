@@ -26,7 +26,7 @@ The project is currently in the prototype state. In this project, I've demonstra
 -- ![alt text](https://raw.githubusercontent.com/s1mar/Patching-Mechanism/main/pics/case3.jpg?raw=true)
 - **Case 4 : Build Greater**: In this case, the running process is already at a higher build number than the patch, basically the patch which we're pushing is old.
  -- Restore the resources to the pre-patch state by replacing the **work** directory with the one in **work.zip** 
--- copy the patch from `./patch cases/case 3 - Region Doesn't match/patch` and place in `./`
+-- copy the patch from `./patch cases/case 4 - Build Greater/patch` and place in `./`
 -- Run the Supervisor and enter this command in the Patch Overseer Window `initiate patch`
 -- As you can see in the image below, the patch is not applied since the target is already at a higher build.
 -- ![alt text](https://raw.githubusercontent.com/s1mar/Patching-Mechanism/main/pics/case4.jpg?raw=true)
