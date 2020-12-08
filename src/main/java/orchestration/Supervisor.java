@@ -3,9 +3,6 @@ package orchestration;
 import demo.DemoTargetApp;
 import helper.JavaProcess;
 import patch.PatchOverseer;
-
-import java.io.File;
-import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;

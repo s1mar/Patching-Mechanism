@@ -14,6 +14,8 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class DemoTargetApp extends UnicastRemoteObject implements ITargetApp {
 
+
+
     private static final int BuildNumber= 200;
     private static final String Region = "us-east-1";
 
@@ -55,9 +57,9 @@ public class DemoTargetApp extends UnicastRemoteObject implements ITargetApp {
 
     private void initialization() throws Exception{
         println("/---------------------Target App v1.0---------------------------/");
-        registry = LocateRegistry.createRegistry(ITargetApp.REGISTRY_PORT);
+        registry = LocateRegistry.createRegistry(REGISTRY_PORT);
         ITargetApp stub = getInstance();
-        registry.bind(ITargetApp.SERVICE_NAME,stub);
+        registry.bind(SERVICE_NAME,stub);
         println("Server started");
         runJob();
     }

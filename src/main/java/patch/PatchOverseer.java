@@ -1,6 +1,8 @@
 package patch;
 
 import demo.ITargetApp;
+import helper.Checksum;
+import helper.Zipper;
 import orchestration.ISupervisor;
 import org.beryx.textio.TextIoFactory;
 import patch.entities.Delfile;
@@ -8,6 +10,8 @@ import patch.entities.Manifest;
 import patch.entities.Modfile;
 import patch.entities.Newfile;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,6 +21,9 @@ import java.rmi.UnmarshalException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+
+import static demo.DemoTargetApp.REGISTRY_PORT;
+import static demo.DemoTargetApp.SERVICE_NAME;
 
 public class PatchOverseer extends UnicastRemoteObject implements IPatchOverseer_Target{
 
@@ -82,8 +89,8 @@ public class PatchOverseer extends UnicastRemoteObject implements IPatchOverseer
 
     private void connectToTarget() throws Exception{
         //Let's get a handle to the target server
-        Registry registry = LocateRegistry.getRegistry(ITargetApp.REGISTRY_PORT);
-        remoteToTarget = (ITargetApp) registry.lookup(ITargetApp.SERVICE_NAME);
+        Registry registry = LocateRegistry.getRegistry(REGISTRY_PORT);
+        remoteToTarget = (ITargetApp) registry.lookup(SERVICE_NAME);
         println("Connected to the Target");
 
     }
@@ -111,7 +118,46 @@ public class PatchOverseer extends UnicastRemoteObject implements IPatchOverseer
 
         //Checking to see if the patch isn't malformed
         String relativePathToDirectory = Paths.get("").toAbsolutePath().toString();
-        Path pathToPatchDirectory = Paths.get(relativePathToDirectory,"/patch/");
+        Path pathToPatchZipDirectory = Paths.get(relativePathToDirectory,"/patch/");
+
+        try{
+            String checkSumPrompt= TextIoFactory.getTextIO().newStringInputReader().read("Please enter checksum>>");
+            //original checksum
+            long checkSumEntered = Long.parseLong(checkSumPrompt);
+            //Compare with the checksum of the file
+            long checkSumFile =  Checksum.getChecksumCRC32(Paths.get(pathToPatchZipDirectory.toAbsolutePath().toString(),"patch.zip"),1024);
+            if(checkSumFile!=checkSumEntered){
+                println("The patch seems to be corrupted, checksums don't match");
+                return;
+            }
+            else{
+                println("Patch validated, proceeding...");
+            }
+        }catch (Exception ex){
+            println("Unable to validate the patch");
+            return;
+        }
+
+
+        try {
+            Zipper.unzipClass(pathToPatchZipDirectory.toAbsolutePath().toString(), "/patch.zip");
+        }catch (Exception ex){
+            println("Something went wrong when unzipping the patch");
+            return;
+        }
+
+        Path pathToPatchDirectory = Paths.get(pathToPatchZipDirectory.toAbsolutePath().toString(),"/staging/patch/");
+
+        try {
+            if (!Files.exists(pathToPatchDirectory)) {
+                Files.createDirectories(Paths.get(pathToPatchDirectory.toString()));
+            }
+        }catch (IOException ex){
+            println("Unable to create patch staging dir");
+            return;
+        }
+
+
         Path pathToManifest = Paths.get(pathToPatchDirectory.toAbsolutePath().toString(),"manifest.json");
         boolean manifestExists = Files.exists(pathToManifest);
 
@@ -209,7 +255,7 @@ public class PatchOverseer extends UnicastRemoteObject implements IPatchOverseer
                     println("Restarting target\n");
                     remoteToSupervisor.startTarget();
                     Thread.sleep(100);
-                    remoteToTarget = (ITargetApp) LocateRegistry.getRegistry(ITargetApp.REGISTRY_PORT).lookup(ITargetApp.SERVICE_NAME);
+                    remoteToTarget = (ITargetApp) LocateRegistry.getRegistry(REGISTRY_PORT).lookup(SERVICE_NAME);
 
                 } catch (Exception ex) {
                     println("Unable to bring the target online. Error : " + ex.toString());
